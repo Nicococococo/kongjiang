@@ -10,6 +10,7 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import java.io.InputStream;
+import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 public class XMLMapperBuilder {
@@ -27,8 +28,9 @@ public class XMLMapperBuilder {
 
         String namespace = rootElement.attributeValue("namespace");
 
-        List<Element> list = rootElement.selectNodes("//select");
+        List<Element> list = rootElement.selectNodes("//select|//insert|//update|//delete");
         for (Element element : list) {
+        	String name = element.getName();
             String id = element.attributeValue("id");
             String resultType = element.attributeValue("resultType");
             String paramterType = element.attributeValue("parameterType");
@@ -38,60 +40,31 @@ public class XMLMapperBuilder {
             mappedStatement.setResultType(resultType);
             mappedStatement.setParamterType(paramterType);
             mappedStatement.setSql(sqlText);
-            mappedStatement.setSqlCommandType(SqlCommandType.SELECT);
+            switch(name){
+				case "insert": {
+					mappedStatement.setSqlCommandType(SqlCommandType.INSERT);
+					break;
+				}
+				case "update": {
+					mappedStatement.setSqlCommandType(SqlCommandType.UPDATE);
+					break;
+				}
+				case "delete": {
+					mappedStatement.setSqlCommandType(SqlCommandType.DELETE);
+					break;
+				}
+				case "select": {
+					mappedStatement.setSqlCommandType(SqlCommandType.SELECT);
+					break;
+				}
+			}
+            
             String key = namespace+"."+id;
             configuration.getMappedStatementMap().put(key,mappedStatement);
         }
         
-        list = rootElement.selectNodes("//insert");
-        for (Element element : list) {
-            String id = element.attributeValue("id");
-            String resultType = element.attributeValue("resultType");
-            String paramterType = element.attributeValue("parameterType");
-            String sqlText = element.getTextTrim();
-            MappedStatement mappedStatement = new MappedStatement();
-            mappedStatement.setId(id);
-            mappedStatement.setResultType(resultType);
-            mappedStatement.setParamterType(paramterType);
-            mappedStatement.setSql(sqlText);
-            mappedStatement.setSqlCommandType(SqlCommandType.INSERT);
-            String key = namespace+"."+id;
-            configuration.getMappedStatementMap().put(key,mappedStatement);
-        }
-        
-        list = rootElement.selectNodes("//update");
-        for (Element element : list) {
-            String id = element.attributeValue("id");
-            String resultType = element.attributeValue("resultType");
-            String paramterType = element.attributeValue("parameterType");
-            String sqlText = element.getTextTrim();
-            MappedStatement mappedStatement = new MappedStatement();
-            mappedStatement.setId(id);
-            mappedStatement.setResultType(resultType);
-            mappedStatement.setParamterType(paramterType);
-            mappedStatement.setSql(sqlText);
-            mappedStatement.setSqlCommandType(SqlCommandType.UPDATE);
-            String key = namespace+"."+id;
-            configuration.getMappedStatementMap().put(key,mappedStatement);
-        }
-        
-        list = rootElement.selectNodes("//delete");
-        for (Element element : list) {
-            String id = element.attributeValue("id");
-            String resultType = element.attributeValue("resultType");
-            String paramterType = element.attributeValue("parameterType");
-            String sqlText = element.getTextTrim();
-            MappedStatement mappedStatement = new MappedStatement();
-            mappedStatement.setId(id);
-            mappedStatement.setResultType(resultType);
-            mappedStatement.setParamterType(paramterType);
-            mappedStatement.setSql(sqlText);
-            mappedStatement.setSqlCommandType(SqlCommandType.DELETE);
-            String key = namespace+"."+id;
-            configuration.getMappedStatementMap().put(key,mappedStatement);
-        }
+        System.out.println(1111);
         
     }
-
 
 }
